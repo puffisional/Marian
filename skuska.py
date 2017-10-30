@@ -1,0 +1,5 @@
+from __future__ import print_function
+
+import urllib, urllib2
+
+print(urllib2.urlparse.parse_qs("/wEdAAjFcpC+wJdCtIiM+LJhdo3FtgRLovzKXAiu/gOie8+4B6RBExsIOTdS6lfG+DdIcM30U+8f8Gp/p59vRpeaphtRk+JwaG5f1jsLKTidNXm9GzVgkQXFv9coy5WVnNNJYklM0UQBWfOgQbZ/QrK1t0Z/8nr8cXZ323vgG4rmmwivUGYQJIeAp4WaescNQeFZTBUa3eZ+ufLNKNhR8ASDICuE"))
