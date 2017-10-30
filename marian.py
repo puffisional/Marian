@@ -5,21 +5,25 @@ from __init__ import connectMysql
 import better
 import datetime
 import random
+from strategies import getStrategy, STRAT_RANDOM
 
 class Marian():
     
-    lastBetTime = datetime.datetime.now()
-    lastBetNumbers = []
-    stats = {
+    def __init__(self, simulateMode=False):
+        self.msql = connectMysql()
+        self.simulateMode = simulateMode
+        self.stats = {
         "bets":0,
         "hits":0,
         "miss":0,
         }
-    tiers = None
-    prefferedTier = -1
-    
-    def __init__(self):
-        self.msql = connectMysql()
+        self.lastBetTime = datetime.datetime.now()
+        self.lastBetNumbers = []
+        self.tiers = None
+        self.prefferedTier = -1
+        self.prefferedStrategy = STRAT_RANDOM
+        self.simulateMode = True
+        self.betNumbersCount = 2
     
     def __del__(self):
         self.msql.close()
@@ -28,11 +32,12 @@ class Marian():
         if len(numbers) == 0: 
             self.lastBetNumbers = []
             return
-            
+        
         self.lastBetNumbers = numbers
         self.stats["bets"] += 1
-        print(numbers)
-        better.betNumbers(numbers)
+        
+        if not self.simulateMode:
+            better.betNumbers(numbers)
         
 #     def prepareBet(self, nextBetTime):
 #         if nextBetTime == self.lastBetTime + datetime.timedelta(minutes=5): 
@@ -61,11 +66,17 @@ class Marian():
     
     def prepareBet(self, nextBetTime):
         
-#         if nextBetTime == self.lastBetTime + datetime.timedelta(minutes=5): 
-#             if len(self.lastBetNumbers) > 0:
-#                 self.checkBet(self.lastBetTime, self.lastBetNumbers)
+        if nextBetTime == self.lastBetTime + datetime.timedelta(minutes=5): 
+            if len(self.lastBetNumbers) > 0:
+                self.checkBet(self.lastBetTime, self.lastBetNumbers)
         
-        self.bet(self.getRandomFromTier(2, self.prefferedTier))
+        strategy = getStrategy(self.prefferedStrategy)
+        numbers = []
+        
+        if self.prefferedStrategy == STRAT_RANDOM:
+            numbers = strategy(self.betNumbersCount)
+        
+        self.bet(numbers)
         self.lastBetTime = nextBetTime
     
     def checkBet(self, betTime, numbers):
@@ -111,3 +122,9 @@ class Marian():
     
     def getRandomFromTier(self, count, tier=-1):
         return random.sample(self.tiers[tier], count)
+    
+    def applyStrategy(self, strategyId):
+        pass
+    
+    def checkLastBet(self):
+        self.checkBet(self.lastBetTime, self.lastBetNumbers)
