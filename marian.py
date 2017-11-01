@@ -5,13 +5,13 @@ from __init__ import connectMysql
 import better
 import datetime
 import random
-from strategies import getStrategy, STRAT_RANDOM
+from Marian.strategies import getStrategy, STRAT_RANDOM, STRAT_FIXED, STRAT_TIER, STRAT_DISTRIBUTION
 
 class Marian():
     
-    def __init__(self, simulateMode=False):
+    def __init__(self, simulateBets=False):
         self.msql = connectMysql()
-        self.simulateMode = simulateMode
+        self.simulationMode = simulateBets
         self.stats = {
         "bets":0,
         "hits":0,
@@ -19,11 +19,9 @@ class Marian():
         }
         self.lastBetTime = datetime.datetime.now()
         self.lastBetNumbers = []
-        self.tiers = None
         self.prefferedTier = -1
-        self.prefferedStrategy = STRAT_RANDOM
-        self.simulateMode = True
         self.betNumbersCount = 2
+        self.fixedStratNumbers = [1, 80]
     
     def __del__(self):
         self.msql.close()
@@ -36,46 +34,28 @@ class Marian():
         self.lastBetNumbers = numbers
         self.stats["bets"] += 1
         
-        if not self.simulateMode:
+        if not self.simulationMode:
             better.betNumbers(numbers)
         
-#     def prepareBet(self, nextBetTime):
-#         if nextBetTime == self.lastBetTime + datetime.timedelta(minutes=5): 
-#             if len(self.lastBetNumbers) > 0:
-#                 self.checkBet(self.lastBetTime, self.lastBetNumbers)
-#             return
-#         
-#         cursor = self.msql.cursor()
-#         data = (nextBetTime - datetime.timedelta(minutes=5), nextBetTime - datetime.timedelta(minutes=10))
-#         cursor.execute("SELECT * from pots where datetime in (%s, %s)", data)
-#          
-#         index = 0
-#         numbers = []
-#         for index, date in enumerate(cursor):
-#             numbers.append(date[2:])
-#         if index == 1:
-#             sect = set(numbers[0]).intersection(numbers[1])
-#             if len(sect) > 0:
-#                 self.bet(self.getFromTier(sect, tier=-1))
-#             else:
-#                 self.lastBetNumbers = []
-#         tier = self.tiers[5]
-#         self.bet([tier[randint(0,len(tier)-1)], tier[randint(0,len(tier)-1)]])
-        
-#         self.lastBetTime = nextBetTime
-    
-    def prepareBet(self, nextBetTime):
+    def prepareBet(self, nextBetTime, strategyId=STRAT_RANDOM):
         
         if nextBetTime == self.lastBetTime + datetime.timedelta(minutes=5): 
             if len(self.lastBetNumbers) > 0:
                 self.checkBet(self.lastBetTime, self.lastBetNumbers)
         
-        strategy = getStrategy(self.prefferedStrategy)
+        strategy = getStrategy(strategyId)
         numbers = []
         
-        if self.prefferedStrategy == STRAT_RANDOM:
+        if strategyId == STRAT_RANDOM:
             numbers = strategy(self.betNumbersCount)
-        
+        elif strategyId == STRAT_FIXED:
+            numbers = strategy(self.fixedStratNumbers)
+        elif strategyId == STRAT_TIER:
+            numbers = strategy(self.betNumbersCount, toDate = nextBetTime - datetime.timedelta(minutes=30), tierSize=3, tier=-2)
+        elif strategyId == STRAT_DISTRIBUTION:
+            numbers = strategy(self.betNumbersCount, nextBetTime)
+            print(numbers)
+            
         self.bet(numbers)
         self.lastBetTime = nextBetTime
     
@@ -91,38 +71,9 @@ class Marian():
             self.stats["hits"] += 1
         else:
             self.stats["miss"] += 1
-            
-    def getRepeatedNumbers(self, fromDate, toDate, tierSize=4):
-        cursor = self.msql.cursor()
-        numberDistribution = []
-        for i in range(1, 81):
-            query = "select count(*) as distribution from pots where (num1=%s or num2=%s or num3=%s or num4=%s or num5=%s or \
-                                                     num6=%s or num7=%s or num8=%s or num9=%s or num10=%s or \
-                                                     num11=%s or num12=%s or num13=%s or num14=%s or num15=%s or \
-                                                     num16=%s or num17=%s or num18=%s or num19=%s or num20=%s) \
-                                                     and datetime between %s and %s"
-            data = ("%s" % i,)*20 + (fromDate, toDate)
-            cursor.execute(query, data)
-            numberDistribution.append((i, cursor.fetchone()[0]))
         
-        numberDistribution.sort(key=lambda x: x[1])
-        tiers = []
-        ranging = int(80/tierSize)
-        for i in range(ranging):
-            tier = [i[0] for i in numberDistribution[i*tierSize: i*tierSize+tierSize]]
-            tiers.append(tier)
-        
-        self.tiers = tiers
-        return tiers
-    
-    def getFromTier(self, inputNumbers, tier=-1):
-        tier = self.tiers[tier]
-        sect = set(inputNumbers).intersection(tier)
-        return list(sect)
-    
-    def getRandomFromTier(self, count, tier=-1):
-        return random.sample(self.tiers[tier], count)
-    
+        self.stats["lastBettime"] = betTime
+         
     def applyStrategy(self, strategyId):
         pass
     

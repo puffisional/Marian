@@ -9,7 +9,7 @@ cnx = mysql.connector.connect(user='martin', password='svn78KE!#',
                               database='keno')
 cursor = cnx.cursor()
 
-years = range(2013, 2014)
+years = range(2009, 2010)
 months = range(1, 13)
 days = range(1, 31)
 hours = range(4, 24)

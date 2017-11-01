@@ -1,5 +1,13 @@
-from __future__ import print_function
+import json
+import os
 
-import urllib, urllib2
+jsonBuffer = "./probabilityBuffer.data"
+if os.path.isfile(jsonBuffer):
+    with open(jsonBuffer, 'r') as f:
+        probabilityBuffer = json.load(f)
+else:
+    probabilityBuffer = dict = {"aaa":0, "b":10}
 
-print(urllib2.urlparse.parse_qs("/wEdAAjFcpC+wJdCtIiM+LJhdo3FtgRLovzKXAiu/gOie8+4B6RBExsIOTdS6lfG+DdIcM30U+8f8Gp/p59vRpeaphtRk+JwaG5f1jsLKTidNXm9GzVgkQXFv9coy5WVnNNJYklM0UQBWfOgQbZ/QrK1t0Z/8nr8cXZ323vgG4rmmwivUGYQJIeAp4WaescNQeFZTBUa3eZ+ufLNKNhR8ASDICuE"))
+with open(jsonBuffer, 'w') as f:
+    json.dump(probabilityBuffer, f)
+print(probabilityBuffer)
