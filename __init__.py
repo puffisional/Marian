@@ -17,7 +17,7 @@ DEFAULT_START_OFFSET = 0
 DT_HASH = [None]
 
 def connectMysql():
-    cnx = mysql.connector.connect(user='martin', password='svn78KE!#',
+    cnx = mysql.connector.connect(user='martin', password='ruPP2.GO!#',
                               host='127.0.0.1',
                               database='keno')
     return cnx

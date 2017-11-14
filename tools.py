@@ -98,7 +98,7 @@ def getNumberDistribution(number, fromDate, toDate):
     msql.close()
     return distribution
 
-def findPatterns(distribution, patternWidth=2):
+def findPatterns(distribution, patternWidth=1):
     patterns = {}
     meta = {
         "hitPatterns": 0,
@@ -186,17 +186,8 @@ def _numberProbability(number, fromDate, toDate, patternWidth=2, target=None, to
             return sortedPatterns
         else:
             target[number] = sortedPatterns
-#     maxHitPattern, maxMissPattern = 0,0
-#     for (pattern, quantity) in sortedPatterns[-5:]:
-#         if pattern[-1] == 1 and quantity > maxHitPattern: maxHitPattern = quantity
-#         elif pattern[-1] == -1 and quantity > maxMissPattern: maxMissPattern = quantity
-#     for index, pattern in enumerate(sortedPatterns):
-#         if pattern[1] == 1: sortedPatterns[index] = (pattern[0], pattern[1], maxHitPattern / pattern[1])
-#         elif pattern[1] == -1: sortedPatterns[index] = (pattern[0], pattern[1], maxMissPattern / pattern[1])
-#     print(sortedPatterns)
+
     # Pass 3
-    
-    
     patternProbabilities = getPatternProbability(copy.deepcopy(sortedPatterns), patterns)
     
     if toPass == 3:  

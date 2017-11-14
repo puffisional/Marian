@@ -5,7 +5,7 @@ import datetime
 from Marian.tools import getRepeatedNumbers, buildPatternProbability
 from math import floor
 from tools import ceilDatetime
-import pickle, pickle
+import pickle
 import os
 from Marian import DEFAULT_START_OFFSET, DEFAULT_TIER, DEFAULT_TIER_OFFSET,\
     DEFAULT_TIER_SIZE, TIER_AVERGAE, TIER_LOW, STRAT_RANDOM,\
